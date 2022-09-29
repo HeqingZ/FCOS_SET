@@ -84,3 +84,42 @@ dataloader.test = L(build_detection_test_loader)(
     ),
     num_workers=2,
 )
+
+
+
+
+# Initialization and trainer settings
+train = model_zoo.get_config("common/train.py").train
+train.amp.enabled = True
+train.ddp.fp16_compression = True
+train.init_checkpoint = ""
+train.max_iter = 270000
+train.output_dir = '/content/drive/MyDrive/FCOS_DEBUG'
+train.checkpointer=dict(period=5000, max_to_keep=100) # options for PeriodicCheckpointer
+train.eval_period=5000
+
+
+lr_multiplier = L(WarmupParamScheduler)(
+    scheduler=L(MultiStepParamScheduler)(
+        values=[1.0, 0.1, 0.01],
+        milestones=[270000-60000, 270000-20000,270000],
+    ),
+    warmup_length=5000 / train.max_iter,
+    warmup_factor=0.001,
+)
+
+
+dataloader.evaluator = L(COCOEvaluator)(
+    dataset_name="${..test.dataset.names}",
+    output_dir= train.output_dir,
+)
+
+
+optimizer = model_zoo.get_config("common/optim.py").AdamW
+optimizer.params.overrides = {
+    "pos_embed": {"weight_decay": 0.0},
+    "rel_pos_h": {"weight_decay": 0.0},
+    "rel_pos_w": {"weight_decay": 0.0},
+}
+optimizer.lr = 0.0001
+print(model)
