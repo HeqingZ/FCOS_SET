@@ -89,11 +89,11 @@ dataloader.test = L(build_detection_test_loader)(
 #######
 #FCOS
 #######
-from ..common.optim import AdamW as optimizer
-from ..common.coco_schedule import lr_multiplier_1x as lr_multiplier
-from ..common.data.coco import dataloader
-from ..common.models.fcos import model
-from ..common.train import train
+from detectron2.configs.common.optim import AdamW as optimizer
+from detectron2.configs.common.coco_schedule import lr_multiplier_1x as lr_multiplier
+from detectron2.configs.common.data.coco import dataloader
+from detectron2.configs.common.models.fcos import model
+from detectron2.configs.common.train import train
 dataloader.train.mapper.use_instance_mask = False
 optimizer.lr = 0.01
 model.backbone.bottom_up.freeze_at = -1
