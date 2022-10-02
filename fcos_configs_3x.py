@@ -97,15 +97,22 @@ from detectron2.configs.common.train import train
 dataloader.train.mapper.use_instance_mask = False
 optimizer.lr = 0.01
 model.backbone.bottom_up.freeze_at = -1
-train.init_checkpoint = "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+train.init_checkpoint = ""
 
 ####
-#R50
+#MViT
 ####
-model.backbone.bottom_up = L(Resnet)(
-    num_classes = 1,    
-    out_features = ("res2", "res3", "res4", "res5")
+model.backbone.bottom_up = L(MViT)(
+    embed_dim=96,
+    depth=10,
+    num_heads=1,
+    last_block_indexes=(0, 2, 7, 9),
+    residual_pooling=True,
+    drop_path_rate=0.2,
+    norm_layer=partial(nn.LayerNorm, eps=1e-6),
+    out_features=("scale2", "scale3", "scale4", "scale5"),
 )
+model.backbone.in_features = "${.bottom_up.out_features}"
 
 
 
