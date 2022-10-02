@@ -5,7 +5,8 @@ from fvcore.common.param_scheduler import MultiStepParamScheduler
 from detectron2 import model_zoo
 from detectron2.config import LazyCall as L
 from detectron2.solver import WarmupParamScheduler
-from detectron2.modeling import MViT
+from detectron2.modeling import FCOS
+from detectron2.modeling import ResNet
 
 
 from detectron2.config import LazyCall as L
@@ -85,6 +86,26 @@ dataloader.test = L(build_detection_test_loader)(
     num_workers=2,
 )
 
+#######
+#FCOS
+#######
+from ..common.optim import AdamW as optimizer
+from ..common.coco_schedule import lr_multiplier_1x as lr_multiplier
+from ..common.data.coco import dataloader
+from ..common.models.fcos import model
+from ..common.train import train
+dataloader.train.mapper.use_instance_mask = False
+optimizer.lr = 0.01
+model.backbone.bottom_up.freeze_at = -1
+train.init_checkpoint = "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+
+####
+#R50
+####
+model.backbone.bottom_up = L(Resnet)(
+    num_classes = 1,    
+    out_features = ("res2", "res3", "res4", "res5")
+)
 
 
 
