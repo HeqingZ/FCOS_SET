@@ -97,7 +97,7 @@ from detectron2.model_zoo.configs.common.train import train
 dataloader.train.mapper.use_instance_mask = False
 optimizer.lr = 0.01
 model.backbone.bottom_up.freeze_at = -1
-train.init_checkpoint = ""
+#train.init_checkpoint = ""
 
 ####
 #MViT
